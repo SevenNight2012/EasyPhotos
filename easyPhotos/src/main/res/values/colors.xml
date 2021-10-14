@@ -42,4 +42,5 @@
 
     <!--状态栏-->
     <color name="easy_photos_status_bar">#393a3f</color>
+    <color name="color_bfcccccc">#bfcccccc</color>
 </resources>

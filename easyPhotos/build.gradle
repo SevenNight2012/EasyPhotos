@@ -1,6 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.HuanTanSheng'
+
+group = "com.xxc.dev"
+ext {
+    moduleName = "easy-photo"
+}
 
 android {
     compileSdkVersion 30
@@ -9,14 +13,14 @@ android {
         minSdkVersion 15
         targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
         vectorDrawables.useSupportLibrary = true
     }
 }
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation('androidx.constraintlayout:constraintlayout:2.0.4')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
@@ -53,3 +57,4 @@ artifacts {
     archives sourcesJar
 //    archives javadocJar
 }
+apply from: "../gradle/upload.gradle"

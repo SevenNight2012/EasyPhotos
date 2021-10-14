@@ -1,0 +1,63 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.android.library'
+
+Properties localConfig = new Properties()
+localConfig.load(rootProject.file('local.properties').newDataInputStream())
+
+def snapshot = localConfig.get("nexus_snapshot")
+def nexusUrl = localConfig.get("nexus_url")
+def nexusUser = localConfig.get("nexus_name")
+def nexusPwd = localConfig.get("nexus_pwd")
+def groupName = group
+def moduleName = moduleName
+def versionName = android.defaultConfig.versionName
+
+System.err.println(">>>>>> $groupName:$moduleName:$versionName")
+
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+// Because the components are created only during the afterEvaluate phase, you must
+// configure your publications using the afterEvaluate() lifecycle method.
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = groupName
+                artifactId = moduleName
+                version = versionName
+                artifact generateSourcesJar
+            }
+            // Creates a Maven publication called “debug”.
+//            debug(MavenPublication) {
+//                // Applies the component for the debug build variant.
+//                from components.debug
+//
+//                groupId = groupName
+//                artifactId = moduleName
+//                version = versionName
+//            }
+        }
+        repositories {
+            // 定义一个 maven 仓库
+            maven {
+                name= "myNexus"
+                // 可以有且仅有一个仓库不指定 name 属性，会隐式设置为 Maven
+                // 根据 versionName 来判断仓库地址
+                url = versionName.endsWith('SNAPSHOT') ? snapshot : nexusUrl
+                // 仓库用户名密码
+                credentials {
+                    username = nexusUser
+                    password = nexusPwd
+                }
+            }
+        }
+    }
+}

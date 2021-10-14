@@ -22,6 +22,7 @@ import com.huantansheng.easyphotos.R;
 import com.huantansheng.easyphotos.constant.Type;
 import com.huantansheng.easyphotos.models.album.entity.Photo;
 import com.huantansheng.easyphotos.setting.Setting;
+import com.huantansheng.easyphotos.utils.file.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -126,11 +127,12 @@ public class PreviewPhotosAdapter extends RecyclerView.Adapter<PreviewPhotosAdap
     private void toPlayVideo(View v, Uri uri, String type) {
         Context context = v.getContext();
         Intent intent = new Intent(Intent.ACTION_VIEW);
+        String path = FileUtils.getPath(context, uri);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
-        intent.setDataAndType(uri, type);
+        intent.setDataAndType(getUri(context, path, intent), type);
         context.startActivity(intent);
     }
 

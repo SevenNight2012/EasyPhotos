@@ -70,3 +70,4 @@ fastlane/readme.md
 # test
 /src/test
 /src/androidTest
+/maven/

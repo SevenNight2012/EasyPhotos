@@ -55,6 +55,7 @@ import com.huantansheng.easyphotos.models.album.entity.Photo;
 import com.huantansheng.easyphotos.result.Result;
 import com.huantansheng.easyphotos.setting.Setting;
 import com.huantansheng.easyphotos.ui.adapter.AlbumItemsAdapter;
+import com.huantansheng.easyphotos.ui.adapter.PhotoClickListener;
 import com.huantansheng.easyphotos.ui.adapter.PhotosAdapter;
 import com.huantansheng.easyphotos.ui.dialog.LoadingDialog;
 import com.huantansheng.easyphotos.ui.widget.PressedTextView;
@@ -75,7 +76,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsAdapter.OnClickListener, PhotosAdapter.OnClickListener, AdListener, View.OnClickListener {
+/**
+ * todo 耦合太重，需要解耦
+ */
+public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsAdapter.OnClickListener, PhotoClickListener, AdListener, View.OnClickListener {
 
     private File mTempImageFile;
 
@@ -355,10 +359,8 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
         contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/JPEG");
         //执行insert操作，向系统文件夹中添加文件
         //EXTERNAL_CONTENT_URI代表外部存储器，该值不变
-        return getContentResolver().insert(MediaStore.Images.Media.getContentUri("external"),
-                contentValues);
+        return getContentResolver().insert(MediaStore.Images.Media.getContentUri("external"), contentValues);
     }
-
 
     private void createCameraTempImageFile() {
         File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
@@ -392,9 +394,7 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
             e.printStackTrace();
             mTempImageFile = null;
         }
-
     }
-
 
     @SuppressLint("MissingSuperCall")
     @Override
@@ -654,9 +654,7 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
                             resultList.add(photo);
 
                             data.putParcelableArrayListExtra(EasyPhotos.RESULT_PHOTOS, resultList);
-
-                            data.putExtra(EasyPhotos.RESULT_SELECTED_ORIGINAL,
-                                    Setting.selectedOriginal);
+                            data.putExtra(EasyPhotos.RESULT_SELECTED_ORIGINAL, Setting.selectedOriginal);
 
                             setResult(RESULT_OK, data);
                             finish();
@@ -668,16 +666,13 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
                 });
             }
         }).start();
-
     }
-
 
     private void onAlbumWorkedDo() {
         initView();
     }
 
     private void initView() {
-
         if (albumModel.getAlbumItems().isEmpty()) {
             if (Setting.isOnlyVideo()) {
                 Toast.makeText(getApplicationContext(), R.string.no_videos_easy_photos, Toast.LENGTH_LONG).show();
@@ -759,7 +754,6 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
     }
 
     private void initAlbumItems() {
-
         rvAlbumItems = findViewById(R.id.rv_album_items);
         albumItemList.clear();
         albumItemList.addAll(albumModel.getAlbumItems());
@@ -913,7 +907,6 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
         } else {
             setHide.start();
         }
-
     }
 
     private void newAnimators() {
@@ -1050,7 +1043,6 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
                 Toast.makeText(getApplicationContext(), getString(R.string.selector_single_type_hint_easy_photos),
                         Toast.LENGTH_SHORT).show();
                 break;
-
         }
     }
 
@@ -1058,7 +1050,6 @@ public class EasyPhotosActivity extends AppCompatActivity implements AlbumItemsA
     public void onSelectorChanged() {
         shouldShowMenuDone();
     }
-
 
     @Override
     public void onBackPressed() {

@@ -38,6 +38,7 @@ import com.huantansheng.easyphotos.ui.EasyPhotosActivity;
 import com.huantansheng.easyphotos.ui.dialog.LoadingDialog;
 import com.huantansheng.easyphotos.utils.permission.PermissionUtil;
 import com.huantansheng.easyphotos.utils.settings.SettingsUtils;
+import com.xxc.dev.permission.Sudo;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -145,6 +146,12 @@ public class SampleActivity extends AppCompatActivity
         rvImage.setAdapter(adapter);
         SnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(rvImage);
+        String[] permissions = {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+        };
+        Sudo.getInstance().prepare().setPermissions(permissions).request(this);
     }
 
     @Override
@@ -168,285 +175,248 @@ public class SampleActivity extends AppCompatActivity
         bitmapView.setVisibility(View.GONE);
 
         int id = item.getItemId();
-        switch (id) {
-            case R.id.camera://单独使用相机
+        if (id == R.id.camera) {
+            //单独使用相机
+            EasyPhotos.createCamera(this, true)
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .start(101);//也可以选择链式调用写法
+        } else if (id == R.id.album_single) {
+            //相册单选，无相机功能
+            EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
+                    .start(101);//也可以选择链式调用写法
+        } else if (id == R.id.album_multi) {
+            //相册多选，无相机功能
+            EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
+                    .setCount(9)
+                    .start(101);//也可以选择链式调用写法
+        } else if (id == R.id.album_camera_single) {
+            //相册单选，有相机功能
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .start(101);//也可以选择链式调用写法
+        } else if (id == R.id.album_camera_multi) {
+            //相册多选，有相机功能
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(22)
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            selectedPhotoList.clear();
+                            selectedPhotoList.addAll(photos);
+                            adapter.notifyDataSetChanged();
+                            rvImage.smoothScrollToPosition(0);
+                        }
 
-                EasyPhotos.createCamera(this,true)
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .start(101);//也可以选择链式调用写法
-
-                break;
-
-            case R.id.album_single://相册单选，无相机功能
-
-                EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
-                        .start(101);//也可以选择链式调用写法
-
-                break;
-
-            case R.id.album_multi://相册多选，无相机功能
-
-                EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
-                        .setCount(9)
-                        .start(101);//也可以选择链式调用写法
-                break;
-
-            case R.id.album_camera_single://相册单选，有相机功能
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .start(101);//也可以选择链式调用写法
-                break;
-
-            case R.id.album_camera_multi://相册多选，有相机功能
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(22)
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                selectedPhotoList.clear();
-                                selectedPhotoList.addAll(photos);
-                                adapter.notifyDataSetChanged();
-                                rvImage.smoothScrollToPosition(0);
-                            }
-
-                            @Override
-                            public void onCancel() {
+                        @Override
+                        public void onCancel() {
 //                                Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                break;
-            case R.id.album_camera_multi_use_width:// 正确的宽高数据，链式调用写法
+                        }
+                    });
+        } else if (id == R.id.album_camera_multi_use_width) {
+            // 正确的宽高数据，链式调用写法
+            EasyPhotos.createAlbum(this, true, true, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(22)
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            selectedPhotoList.clear();
+                            selectedPhotoList.addAll(photos);
+                            adapter.notifyDataSetChanged();
+                            rvImage.smoothScrollToPosition(0);
+                        }
 
-                EasyPhotos.createAlbum(this, true, true, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(22)
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                selectedPhotoList.clear();
-                                selectedPhotoList.addAll(photos);
-                                adapter.notifyDataSetChanged();
-                                rvImage.smoothScrollToPosition(0);
-                            }
-
-                            @Override
-                            public void onCancel() {
+                        @Override
+                        public void onCancel() {
 //                                Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                break;
-            case R.id.album_complex_selector1:// 复杂选择器，最多选择2个视频3张图片
-                EasyPhotos.createAlbum(this,false,false,GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .complexSelector(false,2,3)//参数说明：是否只能选择单类型，视频数，图片数。
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                selectedPhotoList.clear();
-                                selectedPhotoList.addAll(photos);
-                                adapter.notifyDataSetChanged();
-                                rvImage.smoothScrollToPosition(0);
-                            }
+                        }
+                    });
+        } else if (id == R.id.album_complex_selector1) {
+            // 复杂选择器，最多选择2个视频3张图片
+            EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .complexSelector(false, 2, 3)//参数说明：是否只能选择单类型，视频数，图片数。
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            selectedPhotoList.clear();
+                            selectedPhotoList.addAll(photos);
+                            adapter.notifyDataSetChanged();
+                            rvImage.smoothScrollToPosition(0);
+                        }
 
-                            @Override
-                            public void onCancel() {
+                        @Override
+                        public void onCancel() {
 //                                Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
 
-                            }
-                        });
-                break;
-            case R.id.album_complex_selector2:// 复杂选择器，根据用户选择的第一个文件类型，确定用户只能选择的文件类型，视频只能选择2个，图片只能选择3个
-                EasyPhotos.createAlbum(this,false,false,GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .complexSelector(true,2,3)//参数说明：是否只能选择单类型，视频数，图片数。
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                selectedPhotoList.clear();
-                                selectedPhotoList.addAll(photos);
-                                adapter.notifyDataSetChanged();
-                                rvImage.smoothScrollToPosition(0);
-                            }
+                        }
+                    });
+        } else if (id == R.id.album_complex_selector2) {
+            // 复杂选择器，根据用户选择的第一个文件类型，确定用户只能选择的文件类型，视频只能选择2个，图片只能选择3个
+            EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .complexSelector(true, 2, 3)//参数说明：是否只能选择单类型，视频数，图片数。
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            selectedPhotoList.clear();
+                            selectedPhotoList.addAll(photos);
+                            adapter.notifyDataSetChanged();
+                            rvImage.smoothScrollToPosition(0);
+                        }
 
-                            @Override
-                            public void onCancel() {
+                        @Override
+                        public void onCancel() {
 //                                Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else if (id == R.id.album_ad) {
+            //相册中包含广告
+            // 需要在启动前创建广告view
+            // 广告view不能有父布局
+            // 广告view可以包含子布局
+            // 广告View的数据可以在任何时候绑定
+            initAdViews();
 
-                            }
-                        });
-                break;
-            case R.id.album_ad://相册中包含广告
+            //启动方法，装载广告view
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setCameraLocation(Setting.LIST_FIRST)
+                    .setAdView(photosAdView, photosAdLoaded, albumItemsAdView, albumItemsAdLoaded)
+                    .start(101);
+        } else if (id == R.id.album_size) {
+            //只显示限制尺寸或限制文件大小以上的图片
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setMinWidth(500)
+                    .setMinHeight(500)
+                    .setMinFileSize(1024 * 10)
+                    .start(101);
+        } else if (id == R.id.album_original_usable) {
+            //显示原图按钮，并且默认选中，按钮可用
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setOriginalMenu(true, true, null)
+                    .start(101);
+        } else if (id == R.id.album_original_unusable) {
+            //显示原图按钮，并且默认不选中，按钮不可用。使用场景举例：仅VIP可以上传原图
+            boolean isVip = false;//假设获取用户信息发现该用户不是vip
 
-                // 需要在启动前创建广告view
-                // 广告view不能有父布局
-                // 广告view可以包含子布局
-                // 广告View的数据可以在任何时候绑定
-                initAdViews();
-
-                //启动方法，装载广告view
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setCameraLocation(Setting.LIST_FIRST)
-                        .setAdView(photosAdView, photosAdLoaded, albumItemsAdView,
-                                albumItemsAdLoaded)
-                        .start(101);
-
-                break;
-
-            case R.id.album_size://只显示限制尺寸或限制文件大小以上的图片
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setMinWidth(500)
-                        .setMinHeight(500)
-                        .setMinFileSize(1024 * 10)
-                        .start(101);
-
-                break;
-
-            case R.id.album_original_usable://显示原图按钮，并且默认选中，按钮可用
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setOriginalMenu(true, true, null)
-                        .start(101);
-
-                break;
-
-            case R.id.album_original_unusable://显示原图按钮，并且默认不选中，按钮不可用。使用场景举例：仅VIP可以上传原图
-
-                boolean isVip = false;//假设获取用户信息发现该用户不是vip
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setOriginalMenu(false, isVip, "该功能为VIP会员特权功能")
-                        .start(101);
-
-                break;
-
-            case R.id.album_has_video_gif://相册中显示视频和gif图
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setVideo(true)
-                        .setGif(true)
-                        .start(101);
-                break;
-
-            case R.id.album_only_video://相册中只选择视频(相册只有视频 会禁用相机和拼图)
-                EasyPhotos.createAlbum(this, true, true, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .filter(Type.VIDEO)
-                        .start(101);
-                break;
-
-            case R.id.album_no_menu://相册中不显示底部的编辑图标按钮
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setCount(9)
-                        .setPuzzleMenu(false)
-                        .setCleanMenu(false)
-                        .start(101);
-                break;
-
-            case R.id.album_selected://相册中包含默认勾选图片
-
-                EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setPuzzleMenu(false)
-                        .setCount(9)
-                        .setSelectedPhotos(selectedPhotoList)
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setOriginalMenu(false, isVip, "该功能为VIP会员特权功能")
+                    .start(101);
+        } else if (id == R.id.album_has_video_gif) {
+            //相册中显示视频和gif图
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setVideo(true)
+                    .setGif(true)
+                    .start(101);
+        } else if (id == R.id.album_only_video) {
+            //相册中只选择视频(相册只有视频 会禁用相机和拼图)
+            EasyPhotos.createAlbum(this, true, true, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .filter(Type.VIDEO)
+                    .start(101);
+        } else if (id == R.id.album_no_menu) {
+            //相册中不显示底部的编辑图标按钮
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setCount(9)
+                    .setPuzzleMenu(false)
+                    .setCleanMenu(false)
+                    .start(101);
+        } else if (id == R.id.album_selected) {
+            //相册中包含默认勾选图片
+            EasyPhotos.createAlbum(this, true, false, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setPuzzleMenu(false)
+                    .setCount(9)
+                    .setSelectedPhotos(selectedPhotoList)
 //                        .setSelectedPhotoPaths(selectedPhotoPathList)两种方式参数类型不同，根据情况任选
-                        .start(101);
+                    .start(101);
+        } else if (id == R.id.addWatermark) {
+            //给图片添加水印
+            EasyPhotos.createAlbum(this, false, true, GlideEngine.getInstance())
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .setPuzzleMenu(false)
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            selectedPhotoList.clear();
+                            adapter.notifyDataSetChanged();
 
-                break;
-
-            case R.id.addWatermark: //给图片添加水印
-
-                EasyPhotos.createAlbum(this,false,true,GlideEngine.getInstance())
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .setPuzzleMenu(false)
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                selectedPhotoList.clear();
-                                adapter.notifyDataSetChanged();
-
-                                //这一步如果图大的话会耗时，但耗时不长，建议在异步操作。另外copy出来的bitmap在确定不用的时候记得回收，如果你用Glide操作过copy
-                                // 出来的bitmap那就不要回收了，否则Glide会报错。
-                                Bitmap watermark = BitmapFactory.decodeResource(getResources(),
-                                        R.drawable.watermark).copy(Bitmap.Config.RGB_565, true);
-                                try {
-                                    bitmap =
-                                            BitmapFactory.decodeStream(getContentResolver().openInputStream(photos.get(0).uri)).copy(Bitmap.Config.ARGB_8888, true);
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                }
-                                //给图片添加水印的api
-                                bitmap = EasyPhotos.addWatermark(watermark, bitmap, 1080, 20, 20, true,photos.get(0).orientation);
-
-                                bitmapView.setVisibility(View.VISIBLE);
-                                bitmapView.setImageBitmap(bitmap);
-                                Toast.makeText(SampleActivity.this, "水印在左下角", Toast.LENGTH_SHORT).show();
-
+                            //这一步如果图大的话会耗时，但耗时不长，建议在异步操作。另外copy出来的bitmap在确定不用的时候记得回收，如果你用Glide操作过copy
+                            // 出来的bitmap那就不要回收了，否则Glide会报错。
+                            Bitmap watermark = BitmapFactory.decodeResource(getResources(),
+                                    R.drawable.watermark).copy(Bitmap.Config.RGB_565, true);
+                            try {
+                                bitmap =
+                                        BitmapFactory.decodeStream(getContentResolver().openInputStream(photos
+                                                .get(0).uri)).copy(Bitmap.Config.ARGB_8888, true);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
                             }
+                            //给图片添加水印的api
+                            bitmap = EasyPhotos.addWatermark(watermark, bitmap, 1080, 20, 20, true, photos.get(0).orientation);
 
-                            @Override
-                            public void onCancel() {
+                            bitmapView.setVisibility(View.VISIBLE);
+                            bitmapView.setImageBitmap(bitmap);
+                            Toast.makeText(SampleActivity.this, "水印在左下角", Toast.LENGTH_SHORT)
+                                    .show();
 
-                            }
-                        });
+                        }
 
-                break;
+                        @Override
+                        public void onCancel() {
 
-            case R.id.puzzle:
-                EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
-                        .setCount(9)
-                        .setPuzzleMenu(false)
-                        .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                EasyPhotos.startPuzzleWithPhotos(SampleActivity.this, photos,
-                                        Environment.getExternalStorageDirectory().getAbsolutePath(), "AlbumBuilder", false, GlideEngine.getInstance(), new PuzzleCallback() {
-                                            @Override
-                                            public void onResult(Photo photo) {
-                                                selectedPhotoList.clear();
-                                                selectedPhotoList.add(photo);
-                                                adapter.notifyDataSetChanged();
-                                                rvImage.smoothScrollToPosition(0);
-                                            }
+                        }
+                    });
+        } else if (id == R.id.puzzle) {
+            EasyPhotos.createAlbum(this, false, false, GlideEngine.getInstance())
+                    .setCount(9)
+                    .setPuzzleMenu(false)
+                    .setFileProviderAuthority("com.huantansheng.easyphotos.demo.fileprovider")
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            EasyPhotos.startPuzzleWithPhotos(SampleActivity.this, photos,
+                                    Environment.getExternalStorageDirectory()
+                                            .getAbsolutePath(), "AlbumBuilder", false, GlideEngine.getInstance(), new PuzzleCallback() {
+                                        @Override
+                                        public void onResult(Photo photo) {
+                                            selectedPhotoList.clear();
+                                            selectedPhotoList.add(photo);
+                                            adapter.notifyDataSetChanged();
+                                            rvImage.smoothScrollToPosition(0);
+                                        }
 
-                                            @Override
-                                            public void onCancel() {
-                                                Toast.makeText(SampleActivity.this, "Cancel",
-                                                        Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                            }
+                                        @Override
+                                        public void onCancel() {
+                                            Toast.makeText(SampleActivity.this, "Cancel",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
 
-                            @Override
-                            public void onCancel() {
-                                Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-            case R.id.face_detection://人脸检测，目前仅支持正脸检测
-                //暂时不做了。会导致lib过大，而且并不稳定
-                break;
-            default:
-                break;
-
+                        @Override
+                        public void onCancel() {
+                            Toast.makeText(SampleActivity.this, "Cancel", Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    });
+            //暂时不做了。会导致lib过大，而且并不稳定
+        } else if (id == R.id.face_detection) {//人脸检测，目前仅支持正脸检测
+            //暂时不做了。会导致lib过大，而且并不稳定
         }
-
         return true;
     }
 
