@@ -23,6 +23,7 @@
     <string name="addWatermark">图片添加水印</string>
     <string name="face_detection">人脸检测</string>
     <string name="puzzle">拼图(作为单独功能使用）</string>
+    <string name="add_view_into_android_content">向content中添加视图</string>
 
 
 </resources>

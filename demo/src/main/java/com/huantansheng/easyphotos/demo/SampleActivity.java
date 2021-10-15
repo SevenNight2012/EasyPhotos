@@ -9,6 +9,7 @@ import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -173,7 +174,6 @@ public class SampleActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         bitmapView.setVisibility(View.GONE);
-
         int id = item.getItemId();
         if (id == R.id.camera) {
             //单独使用相机
@@ -416,6 +416,10 @@ public class SampleActivity extends AppCompatActivity
             //暂时不做了。会导致lib过大，而且并不稳定
         } else if (id == R.id.face_detection) {//人脸检测，目前仅支持正脸检测
             //暂时不做了。会导致lib过大，而且并不稳定
+        } else if (id == R.id.add_view_into_content) {
+            ViewGroup contentGroup = (ViewGroup) getWindow().getDecorView();
+            View backgroundView = getLayoutInflater().inflate(R.layout.layout_background_view, contentGroup, false);
+            contentGroup.addView(backgroundView, 0);
         }
         return true;
     }
