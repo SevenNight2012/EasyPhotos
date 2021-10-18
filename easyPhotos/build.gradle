@@ -1,3 +1,5 @@
+import com.xxc.dev.AppConfig
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
@@ -7,11 +9,11 @@ ext {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion AppConfig.TARGET_SDK
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 30
+        minSdkVersion AppConfig.MIN_SDK
+        targetSdkVersion AppConfig.TARGET_SDK
         versionCode 1
         versionName "1.0.1"
         vectorDrawables.useSupportLibrary = true
@@ -20,10 +22,10 @@ android {
 
 dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation('androidx.constraintlayout:constraintlayout:2.0.4')
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation AppConfig.CONSTRAINT_LAYOUT
+    implementation AppConfig.APPCOMPAT_ANDROIDX
+    implementation AppConfig.MATERIAL
+    implementation AppConfig.RECYCLER_VIEW
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
 }
@@ -57,4 +59,4 @@ artifacts {
     archives sourcesJar
 //    archives javadocJar
 }
-apply from: "../gradle/upload.gradle"
+apply from: "${file(System.getenv("MY_LIBRARY_UPLOAD_SCRIPT"))}"
